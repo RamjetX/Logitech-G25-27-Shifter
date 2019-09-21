@@ -7,7 +7,7 @@ Logitech G25/27 Shifter library for Arduino 1.6.6+
    This project has used base code from http://www.isrtv.com/forums/topic/13189-diy-g25-shifter-interface-with-h-pattern-sequential-and-handbrake-modes/
 
    My work was simply to adapt and create the arduino library interface so that it was useable and configuarble with the
-   Arduino environment.
+   Arduino environment. I did this back in 2014. Thought someone would make a better one along the way and never got back to it.
 
    Alot of work when into creating a usable library and whilst I don't claim to have originally written the capture and
    decode work. Being a simple Bit-Shift register for the buttons and two Analog sticks for the shift gates, it did seem
