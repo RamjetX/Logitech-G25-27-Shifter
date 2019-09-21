@@ -4,8 +4,8 @@
 #define G25Shifter_h
 
 // H-shifter mode analog axis thresholds
-#define HS_XAXIS_12        450	// Stick left for gears 1 and 2 (was 400)
-#define HS_XAXIS_56        680	// Stick right for gears 5 and 6
+#define HS_XAXIS_12        415	// Stick left for gears 1 and 2 (was 400) (450 for Gem) (415 for Carbo)
+#define HS_XAXIS_56        660	// Stick right for gears 5 and 6
 #define HS_YAXIS_135       750	// Stick forward for gears 1, 3, and 5
 #define HS_YAXIS_246       300	// Stock backward for gears 2,4,6 and Reverse
 

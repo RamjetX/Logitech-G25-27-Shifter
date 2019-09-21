@@ -185,6 +185,9 @@ void G25Shifter::checkHandbrakeMode(){
 /*Function getHShifter
 	Determines and returns the gear selected by the H-Shifter
 	- Adapted from example.
+	
+	H-shifter 0 is Netural
+	Gears 
 */
 int G25Shifter::getHShifter(){
 
@@ -235,12 +238,12 @@ if (buttons_Value_Array[DI_MODE] == 1)       // H-shifter mode? 0 = H-Shifter. 1
       {
         if (shifter_y_Value > SS_UPSHIFT_BEGIN)      // Shifter to the front?
         {
-          gear = 13;                    // Shift-up
+          gear = 8;                    // Shift-up
           shift = UP_SHIFT;            // New state: up-shift
         }
         if (shifter_y_Value < SS_DOWNSHIFT_BEGIN)    // Shifter to the rear?
         {
-          gear = 14;                    // Shift-down
+          gear = 9;                    // Shift-down
           shift = DOWN_SHIFT;          // New state: down-shift
         }
       }//
@@ -249,7 +252,7 @@ if (buttons_Value_Array[DI_MODE] == 1)       // H-shifter mode? 0 = H-Shifter. 1
       {
         if (shifter_y_Value > SS_UPSHIFT_END)
 		{
-			gear = 13; // Beyond lower up-shift threshold: up-shift
+			gear = 8; // Beyond lower up-shift threshold: up-shift
         }
 		else{
 		shift = NO_SHIFT;         // Else new state: no shift
@@ -260,7 +263,7 @@ if (buttons_Value_Array[DI_MODE] == 1)       // H-shifter mode? 0 = H-Shifter. 1
       {
         if (shifter_y_Value < SS_DOWNSHIFT_END)
 		{
-			gear = 14; // Below higher down-shift threshold: down-shift
+			gear = 9; // Below higher down-shift threshold: down-shift
         }
 		else{ 
 		shift = NO_SHIFT;                // Else new state: no shift
