@@ -40,14 +40,90 @@
    G25Shifter(int shifter_x, int shifter_y, int data_input_pin, int data_latch_pin, int data_clock_pin, int led1_pin)
 */
 
+
 // Create Object G25
-G25Shifter G25(A0, A1, 15, 14, 16, 3); // These are the pins I've decided to use on my board... you may change these to your liking
+G25Shifter G25(A0, A1, 14, 16, 15, 3); // These are the pins I've decided to use on my board... you may change these to your liking
 
 Joystick_ Joystick(JOYSTICK_DEFAULT_REPORT_ID, JOYSTICK_TYPE_GAMEPAD,
                    32, 0,                  // Button Count, Hat Switch Count
-                   true, true, false,     // X and Y, but no Z Axis
-                   false, false, false,   // No Rx, Ry, or Rz
-                   false, false,          // No rudder or throttle
+                   false, false, true,     // X and Y, but no Z Axis
+                   true, false, false,   // No Rx, Ry, or Rz
+                   false, true,          // No rudder or throttle
+                   false, true, false);  // No accelerator, brake, or steering
+
+int throttlepin = A3;
+int brakepin = A2;
+int clutchpin = A4;
+int handbrakepin = A5;
+
+void setup() {
+  Joystick.begin();
+//Serial.begin(9600); // You can use this with the debug routine below to see the live data from the shifter
+
+
+}
+/*Main Program loop*/
+void loop() {
+
+
+
+
+
+
+
+
+
+// pedals section of g25 pedals analog inputs A2 , A3 and A4 and analog handbrake A5
+
+
+Joystick.setThrottle(analogRead(throttlepin));
+Joystick.setBrake(analogRead(brakepin));
+Joystick.setZAxis(analogRead(clutchpin));
+Joystick.setRxAxis(analogRead(handbrakepin));
+
+  //Shifter is ready to update and get information from. Remember to update atleast once before checking the information received from it.
+  G25.update();
+
+  // Puts the Gear Selected into Button 1-7 for Gear 1,2,3,4,5,6,R. All lower bank are OFF in Neutral.
+  int gear = G25.getGear();
+
+  /*
+  // Loop through all of the gear buttons. 
+  // Set every button to zero that does not match the currently selected gear. 
+  // Neutral is 0. Gears 1 to 6, 7 is reverse and sequential shift up is 8 - and shift down is 9
+  // 
+  
+
+
+*/
+
+ for (int i = 1; i < 10; i++) { // Loop through all of the gear buttons. Set every button to zero that does not match the currently selected gear. Gears 1 to 6, 7 for reverse Includes sequential gears 8 - 9
+   int y = 0;
+    if (i != gear) {
+      y = i -1 ;
+      Joystick.setButton(y, 0);
+    }
+    else {
+      y = i -1;
+      Joystick.setButton(y, 1);
+    }
+  }//end gear
+
+
+  // Get the rest of the buttons from the shifter. Last button for gears is 9... so start at 10.
+  int y = 0; 
+  for (int i = 9; i <= 20; i++) { // get the button values from 4 to 12. Note, G25 Buttons 0-3 are not physical buttons you can use, they are either Missing from the board or Reverse mode and Sequential switch. Not mapped to the game since you don't really have control over them.
+  
+  y = i -5;
+    Joystick.setButton(i,G25.getButton(y));
+  }
+
+//G25.print();    // Uncomment this if you want to print the serial debug information to the serial port. It's good for checking the X/Y values of the stick to tune the gate values if you have a dodgy stick.
+
+  //delay(10); // small delay just slows the refresh rate to help with flooding the PC with updates that aren't needed in a hurry from a shifter.
+
+}// end loop
+
                    false, false, false);  // No accelerator, brake, or steering
 
 
