@@ -4,18 +4,21 @@
 #define G25Shifter_h
 
 // H-shifter mode analog axis thresholds
-#define HS_XAXIS_12        415	// Stick left for gears 1 and 2 (was 400) (450 for Gem) (415 for Carbo)
-#define HS_XAXIS_56        660	// Stick right for gears 5 and 6
-#define HS_YAXIS_135       750	// Stick forward for gears 1, 3, and 5
-#define HS_YAXIS_246       300	// Stock backward for gears 2,4,6 and Reverse
+#define HS_XAXIS_12        300	// Stick left for gears 1 and 2 (was 400) (450 for Gem) (415 for Carbo)
+#define HS_XAXIS_56        615	// Stick right for gears 5 and 6
+#define HS_YAXIS_135       700	// Stick forward for gears 1, 3, and 5
+#define HS_YAXIS_246       335	// Stock backward for gears 2,4,6 and Reverse
+#define centermode_up      550
+#define centermode_down    450
+
 
 // Sequential shifter mode analog axis thresholds
-#define SS_UPSHIFT_BEGIN   600
-#define SS_UPSHIFT_END     600
-#define SS_DOWNSHIFT_BEGIN 410
-#define SS_DOWNSHIFT_END   410
-
+#define SS_UPSHIFT_BEGIN   560
+#define SS_UPSHIFT_END     515
+#define SS_DOWNSHIFT_BEGIN 440
+#define SS_DOWNSHIFT_END   320
 // Handbrake mode analog axis limits
+#define HB_MAXIMUM         530
 #define HB_MAXIMUM         530
 #define HB_MINIMUM         400
 #define HB_RANGE           (HB_MAXIMUM-HB_MINIMUM)
@@ -35,6 +38,7 @@
 #define DI_DPAD_LEFT       13
 #define DI_DPAD_BOTTOM     14
 #define DI_DPAD_TOP        15
+ 
 
 // Shifter state
 #define DOWN_SHIFT         -1
@@ -63,11 +67,12 @@ class G25Shifter
 		void update();	// updates all of the information from the G25.
 		void print(); // Prints all the debug values to serial port
 		void G25Setled1(bool led1); // Sets the LED's on the G25
+	
 		
 	private:
 		
 		void readButtons();
-		void checkHandbrakeMode();
+		
 		
 
 };

@@ -11,7 +11,9 @@ New Library for handling the G25 and G27 Shifter
 
 // Gear
 int gear = 0;
-
+int centermode = 0;
+unsigned long  lasttime = 0 ;
+unsigned long time1 = 0;
 // Shifter state
 int shift = NO_SHIFT;
 
@@ -135,51 +137,49 @@ int G25Shifter::getBrake(){
 	- Adapted from example.
 */
 void G25Shifter::readButtons(){
+	
+	time1 = micros();
+	
   digitalWrite(data_latch_pin, LOW);         // Switch to parallel mode: digital inputs are read into shift register
-  delayMicroseconds(10);               		 // Wait for signal to settle
-  digitalWrite(data_latch_pin, HIGH);        // Switch to serial mode: one data bit is output on each clock falling edge
+  
+  lasttime = time1 + 10;
+  if(lasttime > time1)
+  {	  
+  
+  
+  //delayMicroseconds(10);               		 // Wait for signal to settle
 
+ 
+
+  digitalWrite(data_latch_pin, HIGH);        // Switch to serial mode: one data bit is output on each clock falling edge
+  }
   // Read all the buttons from the G25 Button Shift Register.
   for (int i = 0; i < 16; i++)         		// Iteration over both 8 bit registers
   {
     digitalWrite(data_clock_pin, LOW);      // Generate clock falling edge
-    delayMicroseconds(10);             		// Wait for signal to settle
+  
+
+time1 = micros();
+
+lasttime = time1 + 10;
+if(lasttime> time1)
+{
+
+ // delayMicroseconds(10);             		// Wait for signal to settle
 	
 	// Read data bit and store it into bit array
     buttons_Value_Array[i] = digitalRead(data_input_pin);   
 	
 	// button read, end the clock cycle and prepare to read the next shift register value
     digitalWrite(data_clock_pin, HIGH);     // Generate clock rising edge
-    delayMicroseconds(10);             		// Wait for signal to settle
+}
+  
   }
   return;
 }
 
 
-/*Function checkHandbrakeMode
-	Looks for combination of keypresses on shifter to convert the stick movement
-	in squential mode into a analog handbrake
-*/
-void G25Shifter::checkHandbrakeMode(){
-// Custom combo to activate Handbrake mode logic
-// To de/activate see combo here
 
-
-  if (buttons_Value_Array[DI_RED_CENTERLEFT] != 0)      // Is left center red button depressed?
-  {
-    if (buttons_Value_Array[DI_RED_CENTERRIGHT] != 0)   // Is right center red button also depressed?
-    {
-      if (buttons_Value_Array[DI_RED_RIGHT] != 0)       // Is rightmost red button also depressed?
-      {
-        shifterMode = HANDBRAKE_MODE;         			// Handbrake mode is activated if the 3 rightmost red buttons are depressed
-      }
-      if (buttons_Value_Array[DI_RED_LEFT] != 0)        // Is leftmost red button also depressed?
-      {
-        shifterMode = SHIFTER_MODE;          			// Handbrake mode is deactivated if the 3 leftmost red buttons are depressed
-      }	
-    }
-  }
-}// end checkHandbrakeMode
 
 
 /*Function getHShifter
@@ -209,78 +209,73 @@ int G25Shifter::getHShifter(){
 	  
 	  if (shifter_y_Value < HS_YAXIS_246){
 		gear = 6;  									// 6th gear		//back
-		if (buttons_Value_Array[DI_REVERSE]){		// stick is in 6th/Reverse location. Check which to apply.
-			gear = 7; 								// 7th Gear or Reverse
-		}
 	  }
-	}// end on right
+	  if ( buttons_Value_Array[DI_REVERSE] && shifter_y_Value < HS_YAXIS_246 )
+		{	
+
+ // stick is in 6th/Reverse location. Check which to apply.
+		gear = 7; 
+			
+			// 7th Gear or Reverse
+		}
+		
+	// end on right
+	}	
 	
+	  
 	else                               // Shifter is in the middle
 	{
 	  if (shifter_y_Value > HS_YAXIS_135) gear = 3;  // 3rd gear
 	  if (shifter_y_Value < HS_YAXIS_246) gear = 4;  // 4th gear
 	}// end in middle
-  }
+  // checking if reverse is applied
+  
+  
+  
+  
+  
+  
+  
   return gear;
 }// end getHShifter
-
+}
 
 /*Function getSeqShifter
 returns -1 Downshift,0 No shift, 1 shift
 */
 int G25Shifter::getSeqShifter(){
 gear = 0;
+
+
 if (buttons_Value_Array[DI_MODE] == 1)       // H-shifter mode? 0 = H-Shifter. 1 = Sequential Shifter
     if (shifterMode == SHIFTER_MODE)          // Shifter mode or in Handbrake Mode
     {
+	if(shifter_y_Value >centermode_down && shifter_y_Value <centermode_up)
+	{centermode = 1;
+	}
 	
-      if (shift == NO_SHIFT)           // Current state: no shift
-      {
-        if (shifter_y_Value > SS_UPSHIFT_BEGIN)      // Shifter to the front?
-        {
-          gear = 8;                    // Shift-up
-          shift = UP_SHIFT;            // New state: up-shift
-        }
-        if (shifter_y_Value < SS_DOWNSHIFT_BEGIN)    // Shifter to the rear?
-        {
-          gear = 9;                    // Shift-down
-          shift = DOWN_SHIFT;          // New state: down-shift
-        }
-      }//
-	  
-      if (shift == UP_SHIFT)           // Current state: up-shift?
-      {
-        if (shifter_y_Value > SS_UPSHIFT_END)
-		{
-			gear = 8; // Beyond lower up-shift threshold: up-shift
-        }
-		else{
-		shift = NO_SHIFT;         // Else new state: no shift
-		}
-      }//
-	  
-      if (shift == DOWN_SHIFT)         // Current state: down-shift
-      {
-        if (shifter_y_Value < SS_DOWNSHIFT_END)
-		{
-			gear = 9; // Below higher down-shift threshold: down-shift
-        }
-		else{ 
-		shift = NO_SHIFT;                // Else new state: no shift
-		}
-	  }//
-	  
-    }
+	if(shifter_y_Value > SS_UPSHIFT_BEGIN  && centermode == 1)
+	{
+centermode = 0;
+gear = 8;
+
+
+
+	}
+
+if(shifter_y_Value < SS_DOWNSHIFT_BEGIN  && centermode == 1)
+	{
+centermode = 0;
+gear = 9;
+
+
+	}
+
+    
 	return gear;
 }// end getSeqShifter
+}
 
-
-// To be worked on... returning the raw value of Y at this stage centers at half and isn't mapped correctly.
-int G25Shifter::getHandbrake(){
-	if (shifterMode == HANDBRAKE_MODE){
-		return shifter_y_Value;
-	}
-}// end getHandbrake
 
 
 /*Function calibrateShifter() 
@@ -291,6 +286,9 @@ int G25Shifter::calibrateShifter(){
 	return -1;
 }
 
+
+	
+	
 /*Function update - Refreshes all the buttons and axis
 	Updates all the variables reading from the Shifter
 	Perform this before asking for new data.
@@ -321,8 +319,9 @@ void G25Shifter::print(){
 	Serial.println(getSeqShifter());
 	Serial.print("Gear Function = ");
 	Serial.println(getGear());
+	Serial.println("centermode");
+	Serial.print(centermode);
 	Serial.println("");
-	
 }
 
 
