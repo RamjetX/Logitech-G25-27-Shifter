@@ -4,20 +4,19 @@
 #define G25Shifter_h
 
 // H-shifter mode analog axis thresholds
-#define HS_XAXIS_12        415	// Stick left for gears 1 and 2 (was 400) (450 for Gem) (415 for Carbo)
+#define HS_XAXIS_12        380	// Stick left for gears 1 and 2 (was 400) (450 for Gem) (415 for Carbo)
 #define HS_XAXIS_56        660	// Stick right for gears 5 and 6
 #define HS_YAXIS_135       750	// Stick forward for gears 1, 3, and 5
 #define HS_YAXIS_246       300	// Stock backward for gears 2,4,6 and Reverse
 
 // Sequential shifter mode analog axis thresholds
-#define SS_UPSHIFT_BEGIN   600
-#define SS_UPSHIFT_END     600
-#define SS_DOWNSHIFT_BEGIN 410
-#define SS_DOWNSHIFT_END   410
+#define SS_UPSHIFT		   550
+#define SS_DOWNSHIFT	   350
+
 
 // Handbrake mode analog axis limits
-#define HB_MAXIMUM         530
-#define HB_MINIMUM         400
+#define HB_MAXIMUM         400
+#define HB_MINIMUM         288
 #define HB_RANGE           (HB_MAXIMUM-HB_MINIMUM)
 
 // Digital inputs definitions
@@ -36,11 +35,6 @@
 #define DI_DPAD_BOTTOM     14
 #define DI_DPAD_TOP        15
 
-// Shifter state
-#define DOWN_SHIFT         -1
-#define NO_SHIFT           0
-#define UP_SHIFT           1
-
 // Shifter mode
 #define SHIFTER_MODE       0
 #define HANDBRAKE_MODE     1
@@ -50,7 +44,7 @@
 class G25Shifter
 {
 	public:
-		G25Shifter(int shifter_x, int shifter_y, int data_input_pin, int data_latch_pin, int data_clock_pin, int led1_pin); // constructor
+		G25Shifter(int shifter_x, int shifter_y, int data_input_pin, int data_latch_pin, int data_clock_pin); // constructor
 		bool getButton(int button);	// returns True/False of that button asked for
 		int getAllButtons(); // returns the int value of ALL the buttons current state
 		int getGear();	// return current gear
@@ -62,7 +56,7 @@ class G25Shifter
 		int calibrateShifter(); // Simple analog threshold calibration for the stick gear gates.
 		void update();	// updates all of the information from the G25.
 		void print(); // Prints all the debug values to serial port
-		void G25Setled1(bool led1); // Sets the LED's on the G25
+
 		
 	private:
 		

@@ -12,9 +12,6 @@ New Library for handling the G25 and G27 Shifter
 // Gear
 int gear = 0;
 
-// Shifter state
-int shift = NO_SHIFT;
-
 // Handbrake mode
 int shifterMode = SHIFTER_MODE;
 
@@ -24,7 +21,7 @@ int shifter_y;
 int data_input_pin;
 int data_latch_pin;
 int data_clock_pin;
-int led1_pin;
+
 
 
 // Analog Axis
@@ -35,7 +32,7 @@ int shifter_y_Value;
 int buttons_Value_Array[16];
 
 // Constructor to make a G25 Shifter object 
-G25Shifter::G25Shifter(int G25_shifter_x, int G25_shifter_y, int G25_data_input_pin, int G25_data_latch_pin, int G25_data_clock_pin, int G25_led1_pin)
+G25Shifter::G25Shifter(int G25_shifter_x, int G25_shifter_y, int G25_data_input_pin, int G25_data_latch_pin, int G25_data_clock_pin)
 {
 // Populate the Pins being used
 	shifter_x = G25_shifter_x;
@@ -43,7 +40,7 @@ G25Shifter::G25Shifter(int G25_shifter_x, int G25_shifter_y, int G25_data_input_
 	data_input_pin = G25_data_input_pin;
 	data_latch_pin = G25_data_latch_pin;
 	data_clock_pin = G25_data_clock_pin ;
-	led1_pin = G25_led1_pin;
+
 
 	
 	// G25 shifter analog inputs configuration
@@ -55,15 +52,10 @@ G25Shifter::G25Shifter(int G25_shifter_x, int G25_shifter_y, int G25_data_input_
 	pinMode(data_latch_pin, OUTPUT);    // Parallel/serial latch mode
 	pinMode(data_clock_pin, OUTPUT);    // Clock
 
-	// LED output mode configuration
-	pinMode(led1_pin, OUTPUT);            // LED
-
 	// Digital outputs initialization
-	digitalWrite(led1_pin, LOW);			// Light up the LED
+
 	digitalWrite(data_clock_pin, HIGH);		// Send the first clock edge to the button shift register 
 	digitalWrite(data_latch_pin, HIGH);		// High allows serial read of all the buttons in the shift register
-
-
 
 };// end constructor
 
@@ -155,6 +147,17 @@ void G25Shifter::readButtons(){
   return;
 }
 
+// To be worked on... returning the raw value of Y at this stage centers at half and isn't mapped correctly.
+int G25Shifter::getHandbrake(){
+	checkHandbrakeMode();
+	if (shifterMode == HANDBRAKE_MODE){
+		shifter_y_Value = constrain(shifter_y_Value, HB_MINIMUM, HB_MAXIMUM);
+		shifter_y_Value = map(shifter_y_Value, HB_MINIMUM, HB_MAXIMUM, 1023, 0);
+		
+		return shifter_y_Value;
+	}
+}// end getHandbrake
+
 
 /*Function checkHandbrakeMode
 	Looks for combination of keypresses on shifter to convert the stick movement
@@ -163,22 +166,17 @@ void G25Shifter::readButtons(){
 void G25Shifter::checkHandbrakeMode(){
 // Custom combo to activate Handbrake mode logic
 // To de/activate see combo here
+	if (buttons_Value_Array[DI_MODE] == 1){
+		if (buttons_Value_Array[DI_RED_CENTERLEFT] && buttons_Value_Array[DI_RED_RIGHT]){
+			delay(1000);
+			shifterMode = HANDBRAKE_MODE;         			// Handbrake mode is activated if the 3 rightmost red buttons are depressed
+		}
 
-
-  if (buttons_Value_Array[DI_RED_CENTERLEFT] != 0)      // Is left center red button depressed?
-  {
-    if (buttons_Value_Array[DI_RED_CENTERRIGHT] != 0)   // Is right center red button also depressed?
-    {
-      if (buttons_Value_Array[DI_RED_RIGHT] != 0)       // Is rightmost red button also depressed?
-      {
-        shifterMode = HANDBRAKE_MODE;         			// Handbrake mode is activated if the 3 rightmost red buttons are depressed
-      }
-      if (buttons_Value_Array[DI_RED_LEFT] != 0)        // Is leftmost red button also depressed?
-      {
-        shifterMode = SHIFTER_MODE;          			// Handbrake mode is deactivated if the 3 leftmost red buttons are depressed
-      }	
-    }
-  }
+		if (buttons_Value_Array[DI_RED_LEFT] && buttons_Value_Array[DI_RED_CENTERRIGHT]){
+			delay(1000);
+			shifterMode = SHIFTER_MODE;          			// Handbrake mode is deactivated if the 3 leftmost red buttons are depressed;         			// Handbrake mode is activated if the 3 rightmost red buttons are depressed
+		}
+	}
 }// end checkHandbrakeMode
 
 
@@ -224,63 +222,27 @@ int G25Shifter::getHShifter(){
   return gear;
 }// end getHShifter
 
-
 /*Function getSeqShifter
-returns -1 Downshift,0 No shift, 1 shift
+returns ; gear 8 = up gear, 9 = down gear or 0 = no change
 */
 int G25Shifter::getSeqShifter(){
 gear = 0;
 if (buttons_Value_Array[DI_MODE] == 1)       // H-shifter mode? 0 = H-Shifter. 1 = Sequential Shifter
-    if (shifterMode == SHIFTER_MODE)          // Shifter mode or in Handbrake Mode
-    {
-	
-      if (shift == NO_SHIFT)           // Current state: no shift
-      {
-        if (shifter_y_Value > SS_UPSHIFT_BEGIN)      // Shifter to the front?
-        {
-          gear = 8;                    // Shift-up
-          shift = UP_SHIFT;            // New state: up-shift
-        }
-        if (shifter_y_Value < SS_DOWNSHIFT_BEGIN)    // Shifter to the rear?
-        {
-          gear = 9;                    // Shift-down
-          shift = DOWN_SHIFT;          // New state: down-shift
-        }
-      }//
-	  
-      if (shift == UP_SHIFT)           // Current state: up-shift?
-      {
-        if (shifter_y_Value > SS_UPSHIFT_END)
-		{
-			gear = 8; // Beyond lower up-shift threshold: up-shift
-        }
-		else{
-		shift = NO_SHIFT;         // Else new state: no shift
+    if (shifterMode == SHIFTER_MODE){          // Shifter mode or in Handbrake Mode
+    
+		if(shifter_y_Value > SS_UPSHIFT){
+			gear = 8; //Shift up button
+			return gear;
 		}
-      }//
-	  
-      if (shift == DOWN_SHIFT)         // Current state: down-shift
-      {
-        if (shifter_y_Value < SS_DOWNSHIFT_END)
-		{
-			gear = 9; // Below higher down-shift threshold: down-shift
-        }
-		else{ 
-		shift = NO_SHIFT;                // Else new state: no shift
+		else if(shifter_y_Value < SS_DOWNSHIFT){
+			gear = 9; //Shift down button
+			return gear;
 		}
-	  }//
-	  
+		gear = 0;  //No change  
     }
 	return gear;
 }// end getSeqShifter
 
-
-// To be worked on... returning the raw value of Y at this stage centers at half and isn't mapped correctly.
-int G25Shifter::getHandbrake(){
-	if (shifterMode == HANDBRAKE_MODE){
-		return shifter_y_Value;
-	}
-}// end getHandbrake
 
 
 /*Function calibrateShifter() 
@@ -304,7 +266,7 @@ void G25Shifter::update(){
 /*Function print
 	- Serial prints the current debug values for the X/Y axis
 	  and all the buttons.
-*/
+*/ 
 void G25Shifter::print(){
 	Serial.print("Shifter X = ");
 	Serial.println(shifter_x_Value);
@@ -321,18 +283,9 @@ void G25Shifter::print(){
 	Serial.println(getSeqShifter());
 	Serial.print("Gear Function = ");
 	Serial.println(getGear());
+	Serial.print("Handbrake Mode = ");
+	Serial.println(shifterMode);
 	Serial.println("");
-	
+		
 }
 
-
-void G25Shifter::G25Setled1(bool led1)
-{
-  digitalWrite(led1_pin,led1);
-  
-  //Blink the on-board LED
-  //if(++led==100) led=0;                     // Period is 100 cycles * 10ms = 1s
-  //if(led==0) digitalWrite(LED_PIN, LOW);    // LED is off for 50 cycles
-  //if(led==50) digitalWrite(LED_PIN, HIGH);  // LED is on for 50 cycles
-
-}
