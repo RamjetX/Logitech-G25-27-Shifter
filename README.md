@@ -34,7 +34,7 @@ Logitech G25/27 Shifter library for Arduino 1.6.6+
 
 
 	public:
-		G25Shifter(int shifter_x, int shifter_y, int data_input_pin, int data_latch_pin, int data_clock_pin, int led1_pin); // constructor
+		G25Shifter(int shifter_x, int shifter_y, int data_input_pin, int data_latch_pin, int data_clock_pin); // constructor
 		bool getButton(int button);	// returns True/False of that button asked for
 		int getAllButtons(); // returns the int value of ALL the buttons current state
 		int getGear();	// return current gear
@@ -46,9 +46,7 @@ Logitech G25/27 Shifter library for Arduino 1.6.6+
 		int calibrateShifter(); // Simple analog threshold calibration for the stick gear gates.
 		void update();	// updates all of the information from the G25.
 		void print(); // Prints all the debug values to serial port
-		void G25Setled1(bool led1); // Sets the LED's on the G25
 		
 	private:
-		
 		void readButtons();
 		void checkHandbrakeMode();
