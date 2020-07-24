@@ -26,7 +26,7 @@ void get_Pedals() {
   brake_Adjusted = map(brake, 0, 1023, 0, 1023 - brake_Offset); // Note: The maximum range the brake pedal will report is controlled by the offset from the adjustment pot. Make sure this is set to maximum when calibrating in windows!!!!
   Joystick.setBrake(constrain(brake_Adjusted, 0, 1023)); // I constrain the value before I send it... makes sure it can't accidently overflow and do weird braking stuff.
 #else
-  brake_Adjusted = map(brake, 0, 1023, 0 , 1023); // Note: The maximum range the brake pedal will report is controlled by the offset from the adjustment pot. Make sure this is set to maximum when calibrating in windows!!!!
+  brake = map(brake, 0, 1023, 0 , 1023); // Note: The maximum range the brake pedal will report is controlled by the offset from the adjustment pot. Make sure this is set to maximum when calibrating in windows!!!!
   Joystick.setBrake(constrain(brake, 0, 1023)); // I constrain the value before I send it... makes sure it can't accidently overflow and do weird braking stuff.
 #endif
 
