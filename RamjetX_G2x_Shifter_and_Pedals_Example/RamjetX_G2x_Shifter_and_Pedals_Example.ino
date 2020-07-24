@@ -24,7 +24,7 @@
 /*
    Definitions to toggle options in the code
 */
-#define debug // Uncomment this line if you want Serial to be enabled
+//#define debug // Uncomment this line if you want Serial to be enabled
 //#define brakeForceEnable  // Uncomment this line if you are using an extra pot for brakeforce adjustment
 
 /*
