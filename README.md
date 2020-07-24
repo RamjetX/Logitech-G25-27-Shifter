@@ -50,3 +50,10 @@ Logitech G25/27 Shifter library for Arduino 1.6.6+
 	private:
 		void readButtons();
 		void checkHandbrakeMode();
+
+
+Behind the Scenes video - 
+Explains from start to finish the redevelopment of the library and process of calibration. If you're new to Arduino... grab a coffee or 3 and come along for the journey.
+Initial rework of the older library. G25 working https://youtu.be/O9bbWzrHvQI
+G27 Pinout and testing - https://youtu.be/12fV5rYcdx8
+Calibration and Tuning - https://youtu.be/qT0ENeD1474
